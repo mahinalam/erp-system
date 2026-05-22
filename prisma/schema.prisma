@@ -1,0 +1,154 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  MERCHANDISER
+  IE
+  PRODUCTION_MANAGER
+}
+
+enum StyleStatus {
+  DEVELOPMENT
+  SAMPLED
+  APPROVED
+  PRODUCTION
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  IN_PRODUCTION
+  SHIPPED
+  CANCELLED
+}
+
+enum BOMItemType {
+  FABRIC
+  TRIM
+  LABEL
+  PACKAGING
+}
+
+model User {
+  id       String   @id @default(uuid())
+  name     String
+  email    String   @unique
+  password String
+  role     UserRole
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Buyer {
+  id      String  @id @default(uuid())
+  name    String
+  code    String  @unique
+  country String?
+  email   String?
+  phone   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  styles Style[]
+  orders Order[]
+}
+
+model Style {
+  id           String  @id @default(uuid())
+  styleNo      String  @unique
+  description  String?
+  productImage String?
+
+  buyerId String
+  buyer   Buyer  @relation(fields: [buyerId], references: [id])
+
+  status StyleStatus @default(DEVELOPMENT)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  variants   StyleVariant[]
+  boms       BOM[]
+  orderItems OrderItem[]
+}
+
+model StyleVariant {
+  id String @id @default(uuid())
+
+  styleId String
+  style   Style  @relation(fields: [styleId], references: [id])
+
+  color String
+  size  String
+
+  sku     String  @unique
+  barcode String?
+
+  createdAt DateTime @default(now())
+}
+
+model BOM {
+  id String @id @default(uuid())
+
+  styleId String
+  style   Style  @relation(fields: [styleId], references: [id])
+
+  itemType BOMItemType
+
+  itemName String
+
+  consumption Float
+  unit        String
+
+  supplier String?
+
+  createdAt DateTime @default(now())
+}
+
+model Order {
+  id String @id @default(uuid())
+
+  orderNo String @unique
+
+  buyerId String
+  buyer   Buyer  @relation(fields: [buyerId], references: [id])
+
+  orderDate    DateTime
+  shipmentDate DateTime?
+
+  status OrderStatus @default(PENDING)
+
+  totalQty Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items OrderItem[]
+}
+
+model OrderItem {
+  id String @id @default(uuid())
+
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id])
+
+  styleId String
+  style   Style  @relation(fields: [styleId], references: [id])
+
+  color String
+  size  String
+
+  quantity  Int
+  unitPrice Float
+
+  createdAt DateTime @default(now())
+}
