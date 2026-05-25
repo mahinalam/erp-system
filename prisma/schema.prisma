@@ -36,6 +36,11 @@ enum BOMItemType {
   PACKAGING
 }
 
+enum Season {
+  SS
+  AW
+}
+
 model User {
   id       String   @id @default(uuid())
   name     String
@@ -48,13 +53,13 @@ model User {
 }
 
 model Buyer {
-  id      String  @id @default(uuid())
-  name    String
-  code    String  @unique
-  country String?
-  email   String?
-  phone   String?
-
+  id        String   @id @default(uuid())
+  name      String
+  code      String   @unique
+  country   String?
+  email     String?
+  phone     String?
+  isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -63,9 +68,20 @@ model Buyer {
 }
 
 model Style {
-  id           String  @id @default(uuid())
-  styleNo      String  @unique
-  description  String?
+  id String @id @default(uuid())
+
+  styleNo String @unique
+
+  name String
+
+  season Season
+  year   Int
+
+  description String?
+
+  productType String?
+  fabricType  String?
+
   productImage String?
 
   buyerId String
@@ -73,12 +89,17 @@ model Style {
 
   status StyleStatus @default(DEVELOPMENT)
 
+  isActive Boolean @default(true)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   variants   StyleVariant[]
   boms       BOM[]
   orderItems OrderItem[]
+
+  @@index([buyerId])
+  @@index([styleNo])
 }
 
 model StyleVariant {
@@ -93,7 +114,13 @@ model StyleVariant {
   sku     String  @unique
   barcode String?
 
+  isActive Boolean @default(true)
+
   createdAt DateTime @default(now())
+
+  @@unique([styleId, color, size])
+  @@index([styleId])
+  @@index([sku])
 }
 
 model BOM {
