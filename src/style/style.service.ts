@@ -4,10 +4,10 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 
-import { generateStyleNo } from './helpers/generate-style-no';
-import { PrismaService } from '../../../../prisma/prisma.service';
-import { createStyleSchema, updateStyleSchema } from './schemas/style-schema';
 import { Prisma } from '@prisma/client';
+import { PrismaService } from '../../prisma/prisma.service';
+import { createStyleSchema, updateStyleSchema } from './schemas/style.schema';
+import { generateStyleNo } from './helpers/generate.styleNo';
 
 @Injectable()
 export class StyleService {
